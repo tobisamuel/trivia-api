@@ -71,13 +71,13 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 
 You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
 
-### Documentation Example
+### Endpoint Library
 
-`GET '/api/v1.0/categories'`
+#### GET '/categories'
 
 - Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
 - Request Arguments: None
-- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+- Returns: An object containing az success value and an object with `categories`, that contains an object of `id: category_string` key: value pairs.
 
 ```json
 {
@@ -87,6 +87,223 @@ You will need to provide detailed documentation of your API endpoints including 
   "4": "History",
   "5": "Entertainment",
   "6": "Sports"
+}
+```
+
+#### GET '/questions'
+
+- Fetches: an object containing paginated questions (10 questions per page), a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category, total number of questions and the current category.
+- Request Arguments: `page` (int)
+- Returns: An object containing a success value, paginated `questions`, `categories`, that contains an object of `id: category_string` key: value pairs, total number of questions and the current category.
+
+```json
+{
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "current_category": null,
+  "questions": [
+    {
+      "answer": "Agra",
+      "category": 3,
+      "difficulty": 2,
+      "id": 15,
+      "question": "The Taj Mahal is located in which Indian city?"
+    },
+    {
+      "answer": "Escher",
+      "category": 2,
+      "difficulty": 1,
+      "id": 16,
+      "question": "Which Dutch graphic artist\u2013initials M C was a creator of optical illusions?"
+    },
+    {
+      "answer": "Mona Lisa",
+      "category": 2,
+      "difficulty": 3,
+      "id": 17,
+      "question": "La Giaconda is better known as what?"
+    },
+    {
+      "answer": "One",
+      "category": 2,
+      "difficulty": 4,
+      "id": 18,
+      "question": "How many paintings did Van Gogh sell in his lifetime?"
+    },
+    {
+      "answer": "Jackson Pollock",
+      "category": 2,
+      "difficulty": 2,
+      "id": 19,
+      "question": "Which American artist was a pioneer of Abstract Expressionism, and a leading exponent of action painting?"
+    },
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    },
+    {
+      "answer": "Scarab",
+      "category": 4,
+      "difficulty": 4,
+      "id": 23,
+      "question": "Which dung beetle was worshipped by the ancient Egyptians?"
+    }
+  ],
+  "success": true,
+  "total_questions": 19
+}
+```
+
+#### DELETE '/questions/{question_id}'
+
+- Deletes the question of the given id if it exists.
+- Request Arguments: `question_id` (int)
+- Returns: An object containing a success value.
+
+```json
+{
+  "success": true
+}
+```
+
+#### POST '/questions'
+
+- Creates a new question.
+- Request Arguments: The `question` (string), `answer` (string), `difficulty` (string) and `category` (string).
+- Returns: An object containing a success value, the id of the created question and the total number of questions.
+
+```json
+{
+  "success": true,
+  "created": 32,
+  "total_questions": 28
+}
+```
+
+#### POST '/questions/search'
+
+- Searches for a question.
+- Request Arguments: `searchTerm` (string)
+- Returns: An object containing a success value, questions based on the search term, total number of questions and the current category.
+
+```json
+{
+  "current_category": null,
+  "questions": [
+    {
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+    },
+    {
+      "answer": "Brazil",
+      "category": 6,
+      "difficulty": 3,
+      "id": 10,
+      "question": "Which is the only team to play in every soccer World Cup tournament?"
+    }
+  ],
+  "success": true,
+  "total_questions": 2
+}
+```
+
+#### GET '/categories/{category_id}/questions'
+
+- Fetches: Questions based on a category.
+- Request Arguments: `category_id` (int)
+- Returns: An object containing a success value, questions based on the category ID, total number of questions and the current category.
+
+```json
+{
+  "current_category": 1,
+  "questions": [
+    {
+      "answer": "The Liver",
+      "category": 1,
+      "difficulty": 4,
+      "id": 20,
+      "question": "What is the heaviest organ in the human body?"
+    },
+    {
+      "answer": "Alexander Fleming",
+      "category": 1,
+      "difficulty": 3,
+      "id": 21,
+      "question": "Who discovered penicillin?"
+    },
+    {
+      "answer": "Blood",
+      "category": 1,
+      "difficulty": 4,
+      "id": 22,
+      "question": "Hematology is a branch of medicine involving the study of what?"
+    }
+  ],
+  "success": true,
+  "total_questions": 3
+}
+```
+
+#### POST '/quizzes'
+
+- Fetches: Questions to play the quiz.
+- Request Arguments: `quiz_category` (array) and `previous_questions` (object)
+- Returns: An object containing a success value and a question to play the quiz.
+
+```json
+{
+  "question": {
+    "answer": "Blood",
+    "category": 1,
+    "difficulty": 4,
+    "id": 22,
+    "question": "Hematology is a branch of medicine involving the study of what?"
+  },
+  "success": true
+}
+```
+
+## Error Handling
+
+The API may return three error types when requests fail:
+
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable
+
+Errors are returned as JSON objects in the following format:
+
+```json
+{
+  "success": false,
+  "error": 404,
+  "message": "resource not found"
 }
 ```
 
