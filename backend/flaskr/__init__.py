@@ -9,16 +9,6 @@ from models import setup_db, Question, Category
 QUESTIONS_PER_PAGE = 10
 
 
-def paginate_questions(request, selection):
-    page = request.args.get("page", 1, type=int)
-    start = (page - 1) * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
-
-    questions = [question.format() for question in selection]
-    current_questions = questions[start:end]
-    return current_questions
-
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -37,29 +27,40 @@ def create_app(test_config=None):
 
     @app.route("/categories")
     def get_categories():
-        categories = Category.query.all()
-        formatted_categories = {category.id: category.type for category in categories}
+        try:
+            categories = Category.query.all()
+            formatted_categories = {
+                category.id: category.type for category in categories
+            }
 
-        return jsonify({"success": True, "categories": formatted_categories})
+            return jsonify({"success": True, "categories": formatted_categories})
+        except Exception as e:
+            return e
 
     @app.route("/questions")
     def get_paginated_questions():
-        questions = Question.query.order_by(Question.id).all()
-        paginated_questions = paginate_questions(request, questions)
-        categories = {category.id: category.type for category in Category.query.all()}
+        try:
+            selection = Question.query.order_by(Question.id).paginate(per_page=10)
+            questions = [question.format() for question in selection.items]
 
-        if len(questions) == 0:
-            abort(404)
-
-        return jsonify(
-            {
-                "success": True,
-                "questions": paginated_questions,
-                "total_questions": len(questions),
-                "current_category": None,
-                "categories": categories,
+            categories = {
+                category.id: category.type for category in Category.query.all()
             }
-        )
+
+            if len(questions) == 0:
+                abort(404)
+
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": questions,
+                    "total_questions": len(questions),
+                    "current_category": None,
+                    "categories": categories,
+                }
+            )
+        except Exception as e:
+            return e
 
     @app.route("/questions/<int:question_id>", methods=["DELETE"])
     def delete_question(question_id):
@@ -70,9 +71,9 @@ def create_app(test_config=None):
                 abort(404)
 
             question.delete()
-            return jsonify({"success": True})
-        except:
-            abort(422)
+            return jsonify({"success": True, "deleted": question.id})
+        except Exception as e:
+            return e
 
     @app.route("/questions", methods=["POST"])
     def add_question():
@@ -123,20 +124,22 @@ def create_app(test_config=None):
 
     @app.route("/categories/<int:category_id>/questions")
     def get_questions_by_category(category_id):
-        questions = Question.query.filter(Question.category == category_id).all()
-        paginated_questions = paginate_questions(request, questions)
+        try:
+            selection = Question.query.filter(
+                Question.category == category_id
+            ).paginate(per_page=10)
+            questions = [question.format() for question in selection.items]
 
-        if len(paginated_questions) == 0:
+            return jsonify(
+                {
+                    "success": True,
+                    "questions": questions,
+                    "total_questions": len(questions),
+                    "current_category": category_id,
+                }
+            )
+        except:
             abort(404)
-
-        return jsonify(
-            {
-                "success": True,
-                "questions": paginated_questions,
-                "total_questions": len(questions),
-                "current_category": category_id,
-            }
-        )
 
     @app.route("/quizzes", methods=["POST"])
     def play_quiz():

@@ -5,6 +5,11 @@ from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
 from models import setup_db, Question, Category
+from dotenv import load_dotenv
+
+load_dotenv()
+user = os.getenv("USER")
+password = os.getenv("PASSWORD")
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -16,7 +21,7 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = "trivia_test"
         self.database_path = "postgresql://{}:{}@{}/{}".format(
-            "postgres", "tobabes55", "localhost:5432", self.database_name
+            user, password, "localhost:5432", self.database_name
         )
         setup_db(self.app, self.database_path)
 
@@ -115,6 +120,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data["success"], True)
         self.assertTrue(len(data["questions"]))
         self.assertEqual(data["current_category"], 1)
+
+    def test_get_questions_by_invalid_category(self):
+        res = self.client().get("/categories/99/questions")
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data["success"], False)
+        self.assertEqual(data["message"], "resource not found")
 
     def test_play_quiz(self):
         res = self.client().post(
